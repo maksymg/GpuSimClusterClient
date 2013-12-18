@@ -2,6 +2,7 @@ package com.mgnyniuk.parallel;
 
 import com.gpusim2.config.GridSimConfig;
 import com.gpusim2.config.GridSimOutput;
+import com.mgnyniuk.base.Main;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.util.concurrent.Callable;
 /**
  * Created by maksym on 12/14/13.
  */
-public class Runner implements Callable<List<GridSimOutput>>, Serializable {
+public class Runner implements Callable<Boolean>, Serializable {
 
     private final String CONFIG = "config%s.xml";
     private final String OUTPUT = "output%s.xml";
@@ -30,7 +31,7 @@ public class Runner implements Callable<List<GridSimOutput>>, Serializable {
         this.startIndex = startIndex;
     }
 
-    public List<GridSimOutput> call() throws IOException {
+    public Boolean call() throws IOException {
         ConfigurationUtil.deserializeConfigs(gridSimConfigList, startIndex);
         ThreadListener threadListener = new ThreadListener();
 
@@ -45,14 +46,17 @@ public class Runner implements Callable<List<GridSimOutput>>, Serializable {
 
             while (threadListener.quantityOfEndedThreads != partProcessesQuantity) {
 
-                System.out.println(threadListener.quantityOfEndedThreads);
+                System.out.print(threadListener.quantityOfEndedThreads);
 
                 continue;
             }
 
             threadListener.quantityOfEndedThreads = 0;
+
             //System.out.println("LLLLLLLL");
         }
-        return ConfigurationUtil.loadConfigs(startIndex, partProcessesQuantity);
+        ConfigurationUtil.loadOutputs(startIndex, partProcessesQuantity);
+        //return ConfigurationUtil.loadConfigs(startIndex, partProcessesQuantity);
+        return true;
     }
 }

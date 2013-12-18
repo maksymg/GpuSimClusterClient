@@ -1,6 +1,7 @@
 package com.mgnyniuk.parallel;
 
 import com.gpusim2.config.*;
+import com.mgnyniuk.base.Main;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
@@ -10,6 +11,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by maksym on 12/14/13.
@@ -103,7 +106,7 @@ public class ConfigurationUtil {
         }
     }
 
-    public static List<GridSimOutput> loadConfigs(int startIndex, int partProcessesQuantity) throws FileNotFoundException, IncompatibleVersionException {
+    public static List<GridSimOutput> loadOutputs(int startIndex, int partProcessesQuantity) throws FileNotFoundException, IncompatibleVersionException {
 
         GridSimOutput gridSimOutput;
         List<GridSimOutput> gridSimOutputList = new ArrayList<GridSimOutput>();
@@ -113,19 +116,19 @@ public class ConfigurationUtil {
             XMLDecoder xmlDecoder = new XMLDecoder(in);
             gridSimOutput = (GridSimOutput) xmlDecoder.readObject();
             xmlDecoder.close();
-
+            Main.outputMap.put(i, gridSimOutput);
             gridSimOutputList.add(gridSimOutput);
         }
 
         return gridSimOutputList;
     }
 
-    public static void deserializeOutputs(List<GridSimOutput> gridSimOutputList) throws FileNotFoundException {
+    public static void deserializeOutputs(ConcurrentMap<Integer, GridSimOutput> gridSimOutputMap) throws FileNotFoundException {
         int i = 0;
-        for (GridSimOutput gridSimOutput : gridSimOutputList) {
-            FileOutputStream out = new FileOutputStream("output" + i + ".xml");
+        for (Map.Entry<Integer, GridSimOutput> gridSimOutputMapEntry : gridSimOutputMap.entrySet()) {
+            FileOutputStream out = new FileOutputStream("output" + gridSimOutputMapEntry.getKey() + ".xml");
             XMLEncoder xmlEncoder = new XMLEncoder(out);
-            xmlEncoder.writeObject(gridSimOutput);
+            xmlEncoder.writeObject(gridSimOutputMapEntry.getValue());
             xmlEncoder.flush();
             xmlEncoder.close();
 
