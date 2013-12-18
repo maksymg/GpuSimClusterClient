@@ -1,3 +1,5 @@
+package com.mgnyniuk.base;
+
 import com.gpusim2.config.GridSimConfig;
 
 import java.beans.XMLEncoder;
