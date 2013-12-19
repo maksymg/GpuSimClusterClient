@@ -3,6 +3,7 @@ package com.mgnyniuk.base;
 import com.gpusim2.config.GridSimConfig;
 import com.gpusim2.config.GridSimOutput;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.MaxSizeConfig;
 import com.hazelcast.core.*;
 import com.mgnyniuk.parallel.ConfigurationUtil;
 import com.mgnyniuk.parallel.Runner;
@@ -43,20 +44,21 @@ public class Main {
         List<Future<Boolean>> futuresList = new ArrayList<Future<Boolean>>();
 
         int memberSetSize = memberSet.size();
-        int overallProcessesQuantity = 100;
+        int overallProcessesQuantity = 256;
         int partProcessQuantity = overallProcessesQuantity/memberSetSize;
-        int toIndex = overallProcessesQuantity/memberSetSize;
+        int toIndexBase = overallProcessesQuantity/memberSetSize;
+        int toIndex = toIndexBase;
         int fromIndex = 0;
         int i = 0;
         PrintWriter writer = new PrintWriter("ExecutionTime.txt", "UTF-8");
         long startTime =  System.currentTimeMillis();
         for(Member member : memberSet) {
             List<GridSimConfig> partConfigs = new ArrayList<GridSimConfig>(configs.subList(fromIndex, toIndex));
-            Future<Boolean> future = executorService.submitToMember(new Runner(partProcessQuantity, partProcessQuantity, partConfigs, fromIndex), member);
+            Future<Boolean> future = executorService.submitToMember(new Runner(partProcessQuantity, 16, partConfigs, fromIndex), member);
             futuresList.add(future);
             i++;
-            fromIndex = fromIndex + toIndex;
-            toIndex = toIndex + toIndex;
+            fromIndex = fromIndex + toIndexBase;
+            toIndex = toIndex + toIndexBase;
         }
 
         //List<GridSimOutput> gridSimOutputList = new ArrayList<GridSimOutput>();
