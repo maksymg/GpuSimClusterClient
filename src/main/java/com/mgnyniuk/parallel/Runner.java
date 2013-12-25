@@ -35,8 +35,18 @@ public class Runner implements Callable<Boolean>, Serializable {
         ConfigurationUtil.deserializeConfigs(gridSimConfigList, startIndex);
         ThreadListener threadListener = new ThreadListener();
 
-        for (int j = 0; j < overallProcessesQuantity / partProcessesQuantity; j++) {
-            for (int i = startIndex; i < startIndex + partProcessesQuantity; i++) {
+        int bigCycle = overallProcessesQuantity / partProcessesQuantity;
+        int innerCyclePartProcessesQuantity = partProcessesQuantity;
+        if ((overallProcessesQuantity % partProcessesQuantity > 0) && (overallProcessesQuantity % partProcessesQuantity < partProcessesQuantity)) {
+            bigCycle = bigCycle + 1;
+        }
+        for (int j = 0; j < bigCycle; j++) {
+            if (overallProcessesQuantity % partProcessesQuantity > 0) {
+            if (j == bigCycle - 1) {
+                innerCyclePartProcessesQuantity = overallProcessesQuantity % partProcessesQuantity;
+            }
+            }
+            for (int i = startIndex; i < startIndex + innerCyclePartProcessesQuantity; i++) {
 
                 NotifyingThread notifyingThread = new WorkerThread("GpuSimV2.jar", String.format(CONFIG, (i + j * partProcessesQuantity)),
                         String.format(OUTPUT, (i + j * partProcessesQuantity)));
@@ -44,7 +54,7 @@ public class Runner implements Callable<Boolean>, Serializable {
                 notifyingThread.start();
             }
 
-            while (threadListener.quantityOfEndedThreads != partProcessesQuantity) {
+            while (threadListener.quantityOfEndedThreads != innerCyclePartProcessesQuantity) {
 
                 System.out.print(threadListener.quantityOfEndedThreads);
 

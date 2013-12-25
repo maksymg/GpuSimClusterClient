@@ -53,12 +53,18 @@ public class Main {
         PrintWriter writer = new PrintWriter("ExecutionTime.txt", "UTF-8");
         long startTime =  System.currentTimeMillis();
         for(Member member : memberSet) {
+            if (toIndex == 255)
+            {
+                toIndex = 256;
+                partProcessQuantity = partProcessQuantity + overallProcessesQuantity%memberSetSize;
+            }
             List<GridSimConfig> partConfigs = new ArrayList<GridSimConfig>(configs.subList(fromIndex, toIndex));
-            Future<Boolean> future = executorService.submitToMember(new Runner(partProcessQuantity, 16, partConfigs, fromIndex), member);
+            Future<Boolean> future = executorService.submitToMember(new Runner(partProcessQuantity, 17, partConfigs, fromIndex), member);
             futuresList.add(future);
             i++;
             fromIndex = fromIndex + toIndexBase;
             toIndex = toIndex + toIndexBase;
+
         }
 
         //List<GridSimOutput> gridSimOutputList = new ArrayList<GridSimOutput>();
